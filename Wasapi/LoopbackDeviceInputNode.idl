@@ -1,0 +1,8 @@
+namespace WASAPI
+{
+    [default_interface]
+	runtimeclass LoopbackDeviceInputNode : Windows.Media.Audio.IAudioInputNode
+	{
+		// static Windows.Foundation.IAsyncOperation<LoopbackDeviceInputNode> CreateAsync(Windows.Media.Audio.AudioGraph graph,Windows.Devices.Enumeration.DeviceInformation renderDevice);
+    }
+}

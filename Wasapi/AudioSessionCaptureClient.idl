@@ -1,0 +1,9 @@
+
+namespace Wasapi
+{
+	[default_interface]
+	runtimeclass AudioSessionCaptureClient {
+		UInt32 GetNextPacketSize();
+		Windows.Media.AudioFrame GetBuffer();
+	};
+}
