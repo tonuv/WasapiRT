@@ -102,15 +102,22 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AudioClientBase.h" />
     <ClInclude Include="AudioInterfaceActivator.h" />
+    <ClInclude Include="AudioSessionClientCallback.h" />
     <ClInclude Include="AudioSessionCaptureClient.h" />
     <ClInclude Include="AudioSessionClient.h" />
+    <ClInclude Include="AudioSessionRenderClient.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="wrappers.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AudioClientBase.cpp" />
     <ClCompile Include="AudioInterfaceActivator.cpp" />
+    <ClCompile Include="AudioSessionClientCallback.cpp" />
     <ClCompile Include="AudioSessionCaptureClient.cpp" />
     <ClCompile Include="AudioSessionClient.cpp" />
+    <ClCompile Include="AudioSessionRenderClient.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -119,6 +126,7 @@
   <ItemGroup>
     <Midl Include="AudioSessionCaptureClient.idl" />
     <Midl Include="AudioSessionClient.idl" />
+    <Midl Include="AudioSessionRenderClient.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

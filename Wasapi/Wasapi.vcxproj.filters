@@ -11,21 +11,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Class.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="AudioInterfaceActivator.cpp" />
     <ClCompile Include="AudioSessionCaptureClient.cpp" />
     <ClCompile Include="AudioSessionClient.cpp" />
+    <ClCompile Include="AudioSessionRenderClient.cpp" />
+    <ClCompile Include="AudioClientBase.cpp" />
+    <ClCompile Include="AudioSessionClientCallback.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="AudioInterfaceActivator.h" />
     <ClInclude Include="AudioSessionCaptureClient.h" />
     <ClInclude Include="AudioSessionClient.h" />
+    <ClInclude Include="wrappers.h" />
+    <ClInclude Include="AudioSessionRenderClient.h" />
+    <ClInclude Include="AudioClientBase.h" />
+    <ClInclude Include="AudioSessionClientCallback.h" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="AudioSessionCaptureClient.idl" />
     <Midl Include="AudioSessionClient.idl" />
+    <Midl Include="AudioSessionCaptureClient.idl" />
+    <Midl Include="AudioSessionRenderClient.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Wasapi.def" />

@@ -1,9 +1,16 @@
+import "AudioSessionClient.idl";
 
 namespace Wasapi
 {
+	interface IAudioSessionCaptureCallback
+	{
+		void OnFramesAvailable();
+	};
+
 	[default_interface]
-	runtimeclass AudioSessionCaptureClient {
-		UInt32 GetNextPacketSize();
-		Windows.Media.AudioFrame GetBuffer();
+	runtimeclass AudioSessionCaptureClient : Windows.Foundation.IClosable, IAudioSessionClient
+	{
+		void Initialize();	// Initialize with no callback, default format and default buffer size
+		void Initialize(IAudioSessionCaptureCallback callback);	// Initialize with callback, default format and default buffer size
 	};
 }

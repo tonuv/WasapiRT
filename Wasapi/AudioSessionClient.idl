@@ -1,11 +1,10 @@
 import "AudioSessionCaptureClient.idl";
+import "AudioSessionRenderClient.idl";
 
 namespace Wasapi
 {
-	[default_interface]
-	runtimeclass AudioSessionClient
+	interface IAudioSessionClient
 	{
-		static Windows.Foundation.IAsyncOperation<AudioSessionClient> CreateAsync(String deviceId);
 		void Start();
 		void Stop();
 		void Reset();
@@ -16,9 +15,12 @@ namespace Wasapi
 		Windows.Foundation.TimeSpan Latency{ get; };
 		Windows.Media.MediaProperties.AudioEncodingProperties Format{ get; };
 		Boolean IsFormatSupported(Windows.Media.MediaProperties.AudioEncodingProperties format);
-		void Initialize(Windows.Foundation.TimeSpan bufferDuration, Windows.Media.MediaProperties.AudioEncodingProperties format);
-		void InitializeLoopback(Windows.Foundation.TimeSpan bufferDuration, Windows.Media.MediaProperties.AudioEncodingProperties format);
-		AudioSessionCaptureClient CreateCaptureClient();
 	};
 
+	[default_interface]
+	runtimeclass AudioSessionClient
+	{
+		static Windows.Foundation.IAsyncOperation<AudioSessionRenderClient> CreateRenderClientAsync(Windows.Devices.Enumeration.DeviceInformation device);
+		static Windows.Foundation.IAsyncOperation<AudioSessionRenderClient> CreateRenderClientAsync();
+	};
 }

@@ -7,23 +7,29 @@
 
 namespace winrt::Wasapi::implementation
 {
-	AudioSessionCaptureClient::AudioSessionCaptureClient(winrt::com_ptr<::IAudioCaptureClient> const& captureClient, uint32_t sampleSize, uint32_t sampleRate)
+	AudioSessionCaptureClient::AudioSessionCaptureClient(winrt::com_ptr<::IAudioClient> const& client) : AudioClientBase(client)
 	{
-		_captureClient = captureClient;
-		_sampleSize = sampleSize;
-		_sampleRate = sampleRate;
-
 		MULTI_QI qiFactory[1] = { { &__uuidof(IAudioFrameNativeFactory),nullptr,S_OK } };
 		check_hresult(CoCreateInstanceFromApp(CLSID_AudioFrameNativeFactory, nullptr, CLSCTX_INPROC_SERVER, nullptr, 1, qiFactory));
 		check_hresult(qiFactory[0].hr);
 		copy_from_abi(_audioFrameFactory, qiFactory[0].pItf);
 	}
-	uint32_t AudioSessionCaptureClient::GetNextPacketSize()
+	void AudioSessionCaptureClient::Initialize()
 	{
-		UINT32 packetSize = 0;
-		check_hresult(_captureClient->GetNextPacketSize(&packetSize));
-		return packetSize;
+		InitializeWithDefaults();
+		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
+	void AudioSessionCaptureClient::Initialize(IAudioSessionCaptureCallback const& callback)
+	{
+		_captureCallback = callback;
+		InitializeEventDriven();
+		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
+	}
+	void AudioSessionCaptureClient::OnEventCallback()
+	{
+		_captureCallback.OnFramesAvailable();
+	}
+	/*
 	Windows::Media::AudioFrame AudioSessionCaptureClient::GetBuffer()
 	{
 		// Copy frames from buffer
@@ -60,5 +66,5 @@ namespace winrt::Wasapi::implementation
 		Windows::Media::AudioFrame result{ nullptr };
 		copy_from_abi(result, frame.get());
 		return result;
-	}
+	}*/
 }
