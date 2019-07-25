@@ -19,17 +19,23 @@ namespace winrt::Wasapi::implementation
 
 	void AudioClientBase::Start()
 	{
-		_callback->ScheduleWorkItemWait();
+		if (_callback) {
+			_callback->ScheduleWorkItemWait();
+		}
 		check_hresult(_audioClient->Start());
 	}
 	void AudioClientBase::Stop()
 	{
-		_callback->CancelWorkItemWait();
+		if (_callback) {
+			_callback->CancelWorkItemWait();
+		}
 		check_hresult(_audioClient->Stop());
 	}
 
 	void AudioClientBase::Reset() {
-		_callback->CancelWorkItemWait();
+		if (_callback) {
+			_callback->CancelWorkItemWait();
+		}
 		check_hresult(_audioClient->Reset());
 	}
 	uint32_t AudioClientBase::BufferSize()
@@ -111,9 +117,9 @@ namespace winrt::Wasapi::implementation
 
 	}
 
-	void AudioClientBase::InitializeEventDriven()
+	void AudioClientBase::InitializeEventDriven(DWORD flags)
 	{
-		InitializeWithDefaults(AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
+		InitializeWithDefaults(AUDCLNT_STREAMFLAGS_EVENTCALLBACK | flags);
 		_callback = make_self<AudioSessionClientCallback>(this);
 	}
 

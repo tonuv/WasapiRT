@@ -8,6 +8,8 @@ using Windows.Networking.Vpn;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.TestTools.UnitTesting.AppContainer;
+using Windows.Media.MediaProperties;
 
 namespace Wasapi.test
 {
@@ -37,9 +39,29 @@ namespace Wasapi.test
             }
         }
 
-        public void OnFramesNeeded()
+        // As per docs need to call capture activation on UI thread
+        [TestMethod]
+        [TestCategory("Activation")]
+        public async Task CreateCaptureAsync()
         {
-            throw new NotImplementedException();
+            var client = await AudioSessionClient.CreateCaptureClientAsync();
+            Assert.IsNotNull(client);
         }
+        [TestMethod]
+        [TestCategory("Activation")]
+        public async Task CreateCaptureWithDeviceAsync()
+        {
+            var captureDevices = await DeviceInformation.FindAllAsync(DeviceClass.AudioCapture);
+            if (!captureDevices.Any())
+            {
+                Assert.Inconclusive("No render device found");
+            }
+            else
+            {
+                var client = await AudioSessionClient.CreateCaptureClientAsync(captureDevices.First());
+                Assert.IsNotNull(client);
+            }
+        }
+
     }
 }

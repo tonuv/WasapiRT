@@ -12,5 +12,7 @@ namespace Wasapi
 	{
 		void Initialize();	// Initialize with no callback, default format and default buffer size
 		void Initialize(IAudioSessionCaptureCallback callback);	// Initialize with callback, default format and default buffer size
+		void InitializeLoopback();	// Initialize loopback with no callback, default format and default buffer size
+		void InitializeLoopback(IAudioSessionCaptureCallback callback);	// Initialize with callback, default format and default buffer size
 	};
 }

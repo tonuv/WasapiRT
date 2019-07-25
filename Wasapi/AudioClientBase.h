@@ -12,7 +12,7 @@ namespace winrt::Wasapi::implementation
 		winrt::com_ptr<AudioSessionClientCallback> _callback;
 		HRESULT MediaPropertiesToWaveFormatEx(Windows::Media::MediaProperties::AudioEncodingProperties const& format, WAVEFORMATEX** ppFormat);
 		void InitializeWithDefaults(DWORD flags = 0);
-		void InitializeEventDriven();
+		void InitializeEventDriven(DWORD flags = 0);
 		// IMFAsyncCallback interface implementation
 		HRESULT STDMETHODCALLTYPE GetParameters(DWORD* pdwFlags, DWORD* pdwQueue);
 		HRESULT STDMETHODCALLTYPE Invoke(IMFAsyncResult* pAsyncResult);

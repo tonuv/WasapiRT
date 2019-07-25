@@ -25,6 +25,17 @@ namespace winrt::Wasapi::implementation
 		InitializeEventDriven();
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
+	void AudioSessionCaptureClient::InitializeLoopback()
+	{
+		InitializeWithDefaults(AUDCLNT_STREAMFLAGS_LOOPBACK);
+		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
+	}
+	void AudioSessionCaptureClient::InitializeLoopback(IAudioSessionCaptureCallback const& callback)
+	{
+		_captureCallback = callback;
+		InitializeEventDriven(AUDCLNT_STREAMFLAGS_LOOPBACK);
+		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
+	}
 	void AudioSessionCaptureClient::OnEventCallback()
 	{
 		_captureCallback.OnFramesAvailable();

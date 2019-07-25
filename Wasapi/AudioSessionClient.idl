@@ -22,5 +22,7 @@ namespace Wasapi
 	{
 		static Windows.Foundation.IAsyncOperation<AudioSessionRenderClient> CreateRenderClientAsync(Windows.Devices.Enumeration.DeviceInformation device);
 		static Windows.Foundation.IAsyncOperation<AudioSessionRenderClient> CreateRenderClientAsync();
+		static Windows.Foundation.IAsyncOperation<AudioSessionCaptureClient> CreateCaptureClientAsync(Windows.Devices.Enumeration.DeviceInformation device);
+		static Windows.Foundation.IAsyncOperation<AudioSessionCaptureClient> CreateCaptureClientAsync();
 	};
 }

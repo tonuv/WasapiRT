@@ -10,8 +10,10 @@ namespace winrt::Wasapi::implementation
 	struct AudioSessionClient : AudioSessionClientT<AudioSessionClient>
 	{
 		AudioSessionClient() = default;
-		static Windows::Foundation::IAsyncOperation<Wasapi::AudioSessionRenderClient> CreateRenderClientAsync(winrt::Windows::Devices::Enumeration::DeviceInformation const &device);
+		static Windows::Foundation::IAsyncOperation<Wasapi::AudioSessionRenderClient> CreateRenderClientAsync(Windows::Devices::Enumeration::DeviceInformation device);
 		static Windows::Foundation::IAsyncOperation<Wasapi::AudioSessionRenderClient> CreateRenderClientAsync();
+		static Windows::Foundation::IAsyncOperation<Wasapi::AudioSessionCaptureClient> CreateCaptureClientAsync(Windows::Devices::Enumeration::DeviceInformation device);
+		static Windows::Foundation::IAsyncOperation<Wasapi::AudioSessionCaptureClient> CreateCaptureClientAsync();
 	};
 
 }

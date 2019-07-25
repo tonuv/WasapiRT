@@ -16,6 +16,8 @@ namespace winrt::Wasapi::implementation
 		AudioSessionCaptureClient(winrt::com_ptr<::IAudioClient> const& client);
 		void Initialize();	// initialize non-event driven, default format and default buffer size
 		void Initialize(IAudioSessionCaptureCallback const& callback);
+		void InitializeLoopback();	// initialize non-event driven, default format and default buffer size
+		void InitializeLoopback(IAudioSessionCaptureCallback const& callback);
 
 		virtual void OnEventCallback();
 	};
