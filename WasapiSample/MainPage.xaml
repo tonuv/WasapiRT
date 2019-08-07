@@ -6,9 +6,19 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    xmlns:vis="using:AudioVisualizer"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <Button x:Name="btnPlay" Click="BtnPlay_Click">Play</Button>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="3*"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
+        </Grid.RowDefinitions>
+    
+        <vis:SpectrumVisualizer Grid.Row="1" x:Name="spectrum"></vis:SpectrumVisualizer>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Padding="40">
+            <Button HorizontalAlignment="Center" x:Name="btnStart" Click="BtnStart_Click">Start</Button>
+        </StackPanel>
     </Grid>
 </Page>

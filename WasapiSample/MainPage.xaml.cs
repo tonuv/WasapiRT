@@ -16,6 +16,8 @@ using Windows.UI.Xaml.Navigation;
 using System.Linq;
 using Wasapi;
 using System.Threading.Tasks;
+using Windows.Media.Devices;
+using AudioVisualizer;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -24,28 +26,43 @@ namespace WasapiSample
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page, IAudioSessionRenderCallback
+    public sealed partial class MainPage : Page, IAudioSessionCaptureCallback
     {
         public MainPage()
         {
             this.InitializeComponent();
-            InitializeRenderAsync();
+            InitializeAudioAsync();
         }
 
 
-        AudioSessionRenderClient audioClient;
-        async void InitializeRenderAsync()
+        AudioSessionCaptureClient audioClient;
+        AudioAnalyzer analyzer;
+
+
+        async void InitializeAudioAsync()
         {
-            audioClient = await AudioSessionClient.CreateRenderClientAsync();
-            audioClient.Initialize(this);
+            var defaultRenderDevice = await DeviceInformation.CreateFromIdAsync(Windows.Media.Devices.MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default));
+            audioClient = await AudioSessionClient.CreateCaptureClientAsync(defaultRenderDevice);
+            audioClient.InitializeLoopback(this);
+            var format = audioClient.Format;
+            var step = format.SampleRate / 60;
+            analyzer = new AudioAnalyzer(100000, format.ChannelCount, format.SampleRate, step, 0, 2048, true);
          }
 
-        public void OnFramesNeeded()
-        {
-            System.Diagnostics.Debug.WriteLine($"Callback {DateTime.Now}");
-        }
 
         private void BtnPlay_Click(object sender, RoutedEventArgs e)
+        {
+            audioClient.Start();
+        }
+
+        public void OnFramesAvailable()
+        {
+            var frame = audioClient.GetFrame();
+            System.Diagnostics.Debug.WriteLine(frame.Duration);
+            analyzer.ProcessInput(frame);
+        }
+
+        private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
             audioClient.Start();
         }

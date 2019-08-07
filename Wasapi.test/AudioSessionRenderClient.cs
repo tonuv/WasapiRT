@@ -1,10 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Media;
+using Windows.Networking.Vpn;
 
 namespace Wasapi.test
 {
@@ -43,9 +46,15 @@ namespace Wasapi.test
         [TestMethod]
         public void Render_Padding()
         {
-            Assert.AreEqual(1056u, _sut.Padding);
+            Assert.AreEqual(0u, _sut.Padding);
         }
 
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Render_FramesNeeded()
+        {
+            Assert.AreEqual(_sut.BufferSize, _sut.FramesNeeded);
+        }
         [TestCategory("Operation")]
         [TestMethod]
         public void Render_Start()
@@ -67,6 +76,56 @@ namespace Wasapi.test
             _sut.Start();
         }
 
+        [TestCategory("Operation")]
+        [TestMethod]
+        public void Render_AddFrame()
+        {
+            var frame = new AudioFrame(_sut.BufferSize * 4);
+            using (var buffer = frame.LockBuffer(AudioBufferAccessMode.Read))
+            {
+                Assert.AreEqual(_sut.FramesNeeded, _sut.BufferSize);
+                _sut.AddFrames(buffer);
+                Assert.AreEqual(_sut.FramesNeeded, 0u);
+            }
+        }
 
+
+    }
+
+    [TestClass]
+    public class AudioSessionRenderClientCallbackTests : IAudioSessionRenderCallback
+    {
+        AudioSessionRenderClient _sut;
+        List<TimeSpan> _callbacks;
+        Stopwatch _sw;
+        [TestInitialize]
+        public async Task SetupClient()
+        {
+            _callbacks = new List<TimeSpan>();
+            _sut = await AudioSessionClient.CreateRenderClientAsync();
+            _sut.Initialize(this);
+        }
+
+        [TestCleanup]
+        public void CloseClient()
+        {
+            _sut.Dispose();
+        }
+
+        [TestCategory("Operation")]
+        [TestMethod]
+        public async Task Render_Callbacks()
+        {
+            _sw = Stopwatch.StartNew();
+            _sut.Start();
+            await Task.Delay(50);
+            _sut.Stop();
+            Assert.IsTrue(_callbacks.Any());
+        }
+
+        public void OnFramesNeeded()
+        {
+            _callbacks.Add(_sw.Elapsed);
+        }
     }
 }

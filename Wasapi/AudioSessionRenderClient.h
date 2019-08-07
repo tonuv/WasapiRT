@@ -13,9 +13,10 @@ namespace winrt::Wasapi::implementation
 		AudioSessionRenderClient(winrt::com_ptr<::IAudioClient> const& client) : AudioClientBase(client) {
 
 		}
+		uint32_t FramesNeeded();
 		void Initialize();	// initialize non-event driven, default format and default buffer size
 		void Initialize(IAudioSessionRenderCallback const& callback);
-
+		void AddFrames(Windows::Media::AudioBuffer const& buffer);
 		virtual void OnEventCallback();
     };
 }

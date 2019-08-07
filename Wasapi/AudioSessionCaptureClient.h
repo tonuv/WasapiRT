@@ -9,7 +9,7 @@ namespace winrt::Wasapi::implementation
 {
 	struct AudioSessionCaptureClient : AudioSessionCaptureClientT<AudioSessionCaptureClient>, public AudioClientBase
 	{
-		winrt::com_ptr<::IAudioRenderClient> _captureClient;
+		winrt::com_ptr<::IAudioCaptureClient> _captureClient;
 		IAudioSessionCaptureCallback _captureCallback{ nullptr };
 		winrt::com_ptr<IAudioFrameNativeFactory> _audioFrameFactory;
 
@@ -18,7 +18,8 @@ namespace winrt::Wasapi::implementation
 		void Initialize(IAudioSessionCaptureCallback const& callback);
 		void InitializeLoopback();	// initialize non-event driven, default format and default buffer size
 		void InitializeLoopback(IAudioSessionCaptureCallback const& callback);
-
+		uint32_t NextPacketSize();
+		Windows::Media::AudioFrame GetFrame();
 		virtual void OnEventCallback();
 	};
 

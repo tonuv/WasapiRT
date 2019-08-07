@@ -10,7 +10,9 @@ namespace Wasapi
 	[default_interface]
 	runtimeclass AudioSessionRenderClient : Windows.Foundation.IClosable, IAudioSessionClient
 	{
+		UInt32 FramesNeeded {get; };
 		void Initialize();	// Initialize with no callback, default format and default buffer size
 		void Initialize(IAudioSessionRenderCallback callback);	// Initialize with callback, default format and default buffer size
+		void AddFrames(Windows.Media.AudioBuffer buffer);
 	};
 }

@@ -47,7 +47,7 @@ namespace winrt::Wasapi::implementation
 	uint32_t AudioClientBase::Padding()
 	{
 		UINT32 padding = 0;
-		check_hresult(_audioClient->GetBufferSize(&padding));
+		check_hresult(_audioClient->GetCurrentPadding(&padding));
 		return padding;
 	}
 	winrt::Windows::Foundation::TimeSpan AudioClientBase::DefaultPeriod()
@@ -113,6 +113,8 @@ namespace winrt::Wasapi::implementation
 		WAVEFORMATEX* pFormat = nullptr;
 		check_hresult(_audioClient->GetMixFormat(&pFormat));
 		check_hresult(_audioClient->Initialize(AUDCLNT_SHAREMODE::AUDCLNT_SHAREMODE_SHARED, flags, defaultBufferSize, 0, pFormat, nullptr));
+		audioFrameSize = pFormat->wBitsPerSample >> 3;
+		audioSampleRate = pFormat->nSamplesPerSec;
 		CoTaskMemFree(pFormat);
 
 	}

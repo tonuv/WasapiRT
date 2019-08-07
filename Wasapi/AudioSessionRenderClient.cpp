@@ -1,9 +1,17 @@
 #include "pch.h"
 #include "AudioSessionRenderClient.h"
 #include "AudioSessionRenderClient.g.cpp"
+#include <MemoryBuffer.h>
 
 namespace winrt::Wasapi::implementation
 {
+	uint32_t AudioSessionRenderClient::FramesNeeded()
+	{
+		UINT32 bufferSize = 0, padding = 0;
+		check_hresult(_audioClient->GetBufferSize(&bufferSize));
+		check_hresult(_audioClient->GetCurrentPadding(&padding));
+		return bufferSize - padding;
+	}
 	void AudioSessionRenderClient::Initialize()
 	{
 		InitializeWithDefaults();
@@ -14,6 +22,22 @@ namespace winrt::Wasapi::implementation
 		_renderCallback = callback;
 		InitializeEventDriven();
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioRenderClient), _renderClient.put_void()));
+	}
+	void AudioSessionRenderClient::AddFrames(Windows::Media::AudioBuffer const& buffer)
+	{
+		auto bufferReference = buffer.CreateReference();
+		LPBYTE pSourceBuffer = nullptr;
+		UINT32 capacity = 0;
+		check_hresult(bufferReference.as<::Windows::Foundation::IMemoryBufferByteAccess>()->GetBuffer(&pSourceBuffer, &capacity));
+
+		LPBYTE pDestBuffer = nullptr;
+		HRESULT hr = _renderClient->GetBuffer(capacity / audioFrameSize, &pDestBuffer);
+		if (SUCCEEDED(hr)) {
+			memcpy_s(pDestBuffer,capacity, pSourceBuffer, capacity);
+			hr = _renderClient->ReleaseBuffer(capacity / audioFrameSize, 0);
+		}
+		bufferReference.Close();
+		check_hresult(hr);
 	}
 	void AudioSessionRenderClient::OnEventCallback()
 	{

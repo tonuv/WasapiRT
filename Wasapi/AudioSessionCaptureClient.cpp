@@ -36,12 +36,19 @@ namespace winrt::Wasapi::implementation
 		InitializeEventDriven(AUDCLNT_STREAMFLAGS_LOOPBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
+	uint32_t AudioSessionCaptureClient::NextPacketSize()
+	{
+		UINT32 framesInNextPacket = 0;
+		_captureClient->GetNextPacketSize(&framesInNextPacket);
+		return framesInNextPacket;
+	}
 	void AudioSessionCaptureClient::OnEventCallback()
 	{
 		_captureCallback.OnFramesAvailable();
 	}
-	/*
-	Windows::Media::AudioFrame AudioSessionCaptureClient::GetBuffer()
+
+	
+	Windows::Media::AudioFrame AudioSessionCaptureClient::GetFrame()
 	{
 		// Copy frames from buffer
 		UINT32 samplesInBuffer{ 0 };
@@ -49,9 +56,14 @@ namespace winrt::Wasapi::implementation
 		UINT64 devicePosition{ 0 };
 		UINT64 qpcPosition{ 0 };
 		LPBYTE pSourceBuffer{ nullptr };
-		_captureClient->GetBuffer(&pSourceBuffer, &samplesInBuffer, &flags, &devicePosition, &qpcPosition);
+		_captureClient->GetNextPacketSize(&samplesInBuffer);
 
-		uint32_t bufferByteSize = samplesInBuffer * _sampleSize;
+		HRESULT hr = _captureClient->GetBuffer(&pSourceBuffer, &samplesInBuffer, &flags, &devicePosition, &qpcPosition);
+
+		if (hr == AUDCLNT_S_BUFFER_EMPTY) {
+			return nullptr;
+		}
+		uint32_t bufferByteSize = samplesInBuffer * audioFrameSize;
 		// Create a buffer
 		winrt::com_ptr<IMFMediaBuffer> mediaBuffer;
 		check_hresult(MFCreateMemoryBuffer(bufferByteSize, mediaBuffer.put()));
@@ -69,7 +81,7 @@ namespace winrt::Wasapi::implementation
 		sample->AddBuffer(mediaBuffer.get());
 		sample->SetSampleTime(devicePosition);
 		sample->SetSampleFlags(flags);
-		sample->SetSampleDuration(long(samplesInBuffer) * 10000000L / long(_sampleRate));
+		sample->SetSampleDuration(long(samplesInBuffer) * 10000000L / long(audioSampleRate));
 
 		com_ptr<ABI::Windows::Media::IAudioFrame> frame;
 		check_hresult(_audioFrameFactory->CreateFromMFSample(sample.get(), false, IID_PPV_ARGS(frame.put())));
@@ -77,5 +89,5 @@ namespace winrt::Wasapi::implementation
 		Windows::Media::AudioFrame result{ nullptr };
 		copy_from_abi(result, frame.get());
 		return result;
-	}*/
+	}
 }
