@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
     
         <vis:SpectrumVisualizer Grid.Row="1" x:Name="spectrum"></vis:SpectrumVisualizer>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Padding="40">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Padding="10">
             <Button HorizontalAlignment="Center" x:Name="btnStart" Click="BtnStart_Click">Start</Button>
         </StackPanel>
     </Grid>

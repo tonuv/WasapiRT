@@ -44,22 +44,16 @@ namespace WasapiSample
             var defaultRenderDevice = await DeviceInformation.CreateFromIdAsync(Windows.Media.Devices.MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default));
             audioClient = await AudioSessionClient.CreateCaptureClientAsync(defaultRenderDevice);
             audioClient.InitializeLoopback(this);
-            var format = audioClient.Format;
+            var format = audioClient.GetFormat();
             var step = format.SampleRate / 60;
             analyzer = new AudioAnalyzer(100000, format.ChannelCount, format.SampleRate, step, 0, 2048, true);
          }
 
 
-        private void BtnPlay_Click(object sender, RoutedEventArgs e)
-        {
-            audioClient.Start();
-        }
-
         public void OnFramesAvailable()
         {
             var frame = audioClient.GetFrame();
             System.Diagnostics.Debug.WriteLine(frame.Duration);
-            analyzer.ProcessInput(frame);
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)

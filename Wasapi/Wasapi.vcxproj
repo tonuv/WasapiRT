@@ -108,6 +108,7 @@
     <ClInclude Include="AudioSessionCaptureClient.h" />
     <ClInclude Include="AudioSessionClient.h" />
     <ClInclude Include="AudioSessionRenderClient.h" />
+    <ClInclude Include="Trace.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="wrappers.h" />
   </ItemGroup>
@@ -118,6 +119,7 @@
     <ClCompile Include="AudioSessionCaptureClient.cpp" />
     <ClCompile Include="AudioSessionClient.cpp" />
     <ClCompile Include="AudioSessionRenderClient.cpp" />
+    <ClCompile Include="Trace.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

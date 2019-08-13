@@ -55,9 +55,9 @@ namespace Wasapi.test
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_Uninitialized_Format()
+        public void Render_Uninitialized_GetFormat()
         {
-            var format = _sut.Format;
+            var format = _sut.GetFormat();
             Assert.AreEqual(format.Type, "Audio");
         }
 

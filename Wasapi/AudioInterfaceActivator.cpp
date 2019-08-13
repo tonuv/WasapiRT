@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "AudioInterfaceActivator.h"
+#include "Trace.h"
 
 using namespace winrt;
 
@@ -8,6 +9,9 @@ HRESULT __stdcall Wasapi::AudioInterfaceActivator::ActivateCompleted(IActivateAu
 	HRESULT hrActivate = E_FAIL;
 	com_ptr<IUnknown> activatedInterface;
 	HRESULT hr = pActivateOperation->GetActivateResult(&hrActivate, activatedInterface.put());
+
+	trace::audio_activate_completed(hrActivate, hr);
+
 	if (FAILED(hrActivate)) {
 		activationCompleted.set_exception(winrt::hresult_error(hrActivate));
 	}

@@ -12,13 +12,13 @@ using Windows.Networking.Vpn;
 namespace Wasapi.test
 {
     [TestClass]
-    public class AudioSessionRenderClientTests
+    public class AudioSessionCaptureClientTests
     {
-        AudioSessionRenderClient _sut;
+        AudioSessionCaptureClient _sut;
         [TestInitialize]
         public async Task SetupClient()
         {
-            _sut = await AudioSessionClient.CreateRenderClientAsync();
+            _sut = await AudioSessionClient.CreateCaptureClientAsync();
             _sut.Initialize();
         }
 
@@ -30,35 +30,36 @@ namespace Wasapi.test
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_BufferSize()
+        public void Capture_BufferSize()
         {
             Assert.AreEqual(1056u, _sut.BufferSize);
         }
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_Latency()
+        public void Capture_Latency()
         {
             Assert.AreEqual(TimeSpan.FromMilliseconds(0), _sut.Latency);
         }
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_Padding()
+        public void Capture_Padding()
         {
             Assert.AreEqual(0u, _sut.Padding);
         }
 
+
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_FramesNeeded()
+        public void Capture_NextPacketSize()
         {
-            Assert.AreEqual(_sut.BufferSize, _sut.FramesNeeded);
+            Assert.AreEqual(0u, _sut.NextPacketSize);
         }
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_GetFormat_TypeIsAudio()
+        public void Capture_GetFormat_TypeIsAudio()
         {
             var format = _sut.GetFormat();
             Assert.AreEqual("Audio", format.Type);
@@ -66,59 +67,54 @@ namespace Wasapi.test
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_GetFormat_SubTypeIsAudio()
+        public void Capture_GetFormat_SubTypeIsAudio()
         {
             var format = _sut.GetFormat();
             Assert.AreEqual("Float", format.Subtype);
         }
         [TestCategory("Operation")]
         [TestMethod]
-        public void Render_Start()
+        public void Capture_Start()
         {
             _sut.Start();
         }
 
         [TestCategory("Operation")]
         [TestMethod]
-        public void Render_Stop()
+        public void Capture_Stop()
         {
             _sut.Start();
             _sut.Stop();
         }
         [TestCategory("Operation")]
         [TestMethod]
-        public void Render_Reset()
+        public void Capture_Reset()
         {
             _sut.Reset();
         }
 
         [TestCategory("Operation")]
         [TestMethod]
-        public void Render_AddFrame()
+        public void Capture_AddFrame()
         {
-            var frame = new AudioFrame(_sut.BufferSize * 4);
-            using (var buffer = frame.LockBuffer(AudioBufferAccessMode.Read))
-            {
-                Assert.AreEqual(_sut.FramesNeeded, _sut.BufferSize);
-                _sut.AddFrames(buffer);
-                Assert.AreEqual(_sut.FramesNeeded, 0u);
-            }
+            var frame = _sut.GetFrame();
+            Assert.IsNull(frame);
         }
 
 
     }
 
     [TestClass]
-    public class AudioSessionRenderClientCallbackTests : IAudioSessionRenderCallback
+    public class AudioSessionCaptureClientCallbackTests : IAudioSessionCaptureCallback
     {
-        AudioSessionRenderClient _sut;
+        AudioSessionCaptureClient _sut;
         List<TimeSpan> _callbacks;
         Stopwatch _sw;
         [TestInitialize]
         public async Task SetupClient()
         {
             _callbacks = new List<TimeSpan>();
-            _sut = await AudioSessionClient.CreateRenderClientAsync();
+            _sut = await AudioSessionClient.CreateCaptureClientAsync();
             _sut.Initialize(this);
         }
 
@@ -130,7 +126,7 @@ namespace Wasapi.test
 
         [TestCategory("Operation")]
         [TestMethod]
-        public async Task Render_Callbacks()
+        public async Task Capture_Callbacks()
         {
             _sw = Stopwatch.StartNew();
             _sut.Start();
@@ -139,7 +135,7 @@ namespace Wasapi.test
             Assert.IsTrue(_callbacks.Any());
         }
 
-        public void OnFramesNeeded()
+        public void OnFramesAvailable()
         {
             _callbacks.Add(_sw.Elapsed);
         }

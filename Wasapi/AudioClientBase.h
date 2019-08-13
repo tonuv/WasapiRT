@@ -11,6 +11,7 @@ namespace winrt::Wasapi::implementation
 		winrt::com_ptr<::IAudioClient> _audioClient;
 		winrt::com_ptr<AudioSessionClientCallback> _callback;
 		HRESULT MediaPropertiesToWaveFormatEx(Windows::Media::MediaProperties::AudioEncodingProperties const& format, WAVEFORMATEX** ppFormat);
+		HRESULT InitializeImpl(DWORD flags, REFERENCE_TIME bufferSize, const WAVEFORMATEX* pFormat);
 		void InitializeWithDefaults(DWORD flags = 0);
 		void InitializeEventDriven(DWORD flags = 0);
 		uint32_t audioFrameSize = 0;
@@ -30,7 +31,7 @@ namespace winrt::Wasapi::implementation
 		Windows::Foundation::TimeSpan DefaultPeriod();
 		Windows::Foundation::TimeSpan MinimumPeriod();
 		Windows::Foundation::TimeSpan Latency();
-		Windows::Media::MediaProperties::AudioEncodingProperties Format();
+		Windows::Media::MediaProperties::AudioEncodingProperties GetFormat();
 		bool IsFormatSupported(Windows::Media::MediaProperties::AudioEncodingProperties const& format);
 
 

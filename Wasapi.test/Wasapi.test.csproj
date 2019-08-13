@@ -118,7 +118,9 @@
     <SDKReference Include="TestPlatform.Universal, Version=$(UnitTestPlatformVersion)" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioSessionLoopbackClient.cs" />
     <Compile Include="AudioSessionCaptureClientUninitializedTests.cs" />
+    <Compile Include="AudioSessionCaptureClient.cs" />
     <Compile Include="AudioSessionRenderClient.cs" />
     <Compile Include="AudioSessionRenderClientUninitializedTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

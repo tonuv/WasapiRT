@@ -18,6 +18,7 @@
     <ClCompile Include="AudioSessionRenderClient.cpp" />
     <ClCompile Include="AudioClientBase.cpp" />
     <ClCompile Include="AudioSessionClientCallback.cpp" />
+    <ClCompile Include="Trace.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -28,6 +29,7 @@
     <ClInclude Include="AudioSessionRenderClient.h" />
     <ClInclude Include="AudioClientBase.h" />
     <ClInclude Include="AudioSessionClientCallback.h" />
+    <ClInclude Include="Trace.h" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="AudioSessionClient.idl" />

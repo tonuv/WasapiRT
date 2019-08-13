@@ -15,6 +15,7 @@ namespace winrt::Wasapi::implementation
 		MFWORKITEM_KEY _workItemKey = 0;
 		win32::event _eventCallback;
 		win32::critical_section _csCallback;
+		winrt::hresult _result = S_OK;
 
 		AudioClientBase* _client;
 		AudioSessionClientCallback(AudioClientBase* pClient);

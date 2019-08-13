@@ -13,7 +13,7 @@ namespace Wasapi
 		Windows.Foundation.TimeSpan DefaultPeriod{ get; };
 		Windows.Foundation.TimeSpan MinimumPeriod{ get; };
 		Windows.Foundation.TimeSpan Latency{ get; };
-		Windows.Media.MediaProperties.AudioEncodingProperties Format{ get; };
+		Windows.Media.MediaProperties.AudioEncodingProperties GetFormat();
 		Boolean IsFormatSupported(Windows.Media.MediaProperties.AudioEncodingProperties format);
 	};
 
