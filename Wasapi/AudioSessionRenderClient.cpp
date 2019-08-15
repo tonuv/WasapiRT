@@ -14,13 +14,19 @@ namespace winrt::Wasapi::implementation
 	}
 	void AudioSessionRenderClient::Initialize()
 	{
-		InitializeWithDefaults();
+		if (State() != AudioSessionClientState::Uninitialized)
+			throw hresult_error(E_NOT_VALID_STATE);
+
+		InitializeClient();
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioRenderClient), _renderClient.put_void()));
 	}
 	void AudioSessionRenderClient::Initialize(IAudioSessionRenderCallback const& callback)
 	{
+		if (State() != AudioSessionClientState::Uninitialized)
+			throw hresult_error(E_NOT_VALID_STATE);
+
 		_renderCallback = callback;
-		InitializeEventDriven();
+		InitializeClient(AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioRenderClient), _renderClient.put_void()));
 	}
 	void AudioSessionRenderClient::AddFrames(Windows::Media::AudioBuffer const& buffer)
@@ -41,6 +47,8 @@ namespace winrt::Wasapi::implementation
 	}
 	void AudioSessionRenderClient::OnEventCallback()
 	{
-		_renderCallback.OnFramesNeeded();
+		if (_state == AudioSessionClientState::Running) {
+			_renderCallback.OnFramesNeeded();
+		}
 	}
 }

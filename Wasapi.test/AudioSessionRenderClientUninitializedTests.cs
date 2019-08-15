@@ -49,7 +49,7 @@ namespace Wasapi.test
         public void Render_Uninitialized_MinimumPeriod()
         {
             var minimumPeriod = _sut.MinimumPeriod;
-            Assert.AreEqual(TimeSpan.FromMilliseconds(3), minimumPeriod);
+            Assert.IsTrue(minimumPeriod.TotalMilliseconds <= 3.0);
         }
 
 
@@ -102,6 +102,14 @@ namespace Wasapi.test
 
             Assert.AreEqual(WasapiErrors.AUDCLNT_E_NOT_INITIALIZED, result.HResult);
         }
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Render_Uninitialized_State()
+        {
+            Assert.AreEqual(_sut.State, AudioSessionClientState.Uninitialized);
+        }
+
         [TestCategory("Properties")]
         [TestMethod]
         public void Render_Uninitialized_Reset_Throws()

@@ -10,6 +10,7 @@ namespace winrt::Wasapi::implementation
 {
 	AudioClientBase::AudioClientBase(winrt::com_ptr<::IAudioClient> const& client)
 	{
+		_state = Wasapi::AudioSessionClientState::Uninitialized;
 		_audioClient = client;
 	}
 
@@ -25,10 +26,12 @@ namespace winrt::Wasapi::implementation
 			check_hresult(_callback->ScheduleWorkItemWait());
 		}
 		check_hresult(_audioClient->Start());
+		_state = AudioSessionClientState::Running;
 	}
 	void AudioClientBase::Stop()
 	{
 		auto a = trace::stop(this);
+		_state = AudioSessionClientState::Stopped;
 		if (_callback) {
 			_callback->CancelWorkItemWait();
 		}
@@ -41,6 +44,10 @@ namespace winrt::Wasapi::implementation
 			_callback->CancelWorkItemWait();
 		}
 		check_hresult(_audioClient->Reset());
+	}
+	Wasapi::AudioSessionClientState AudioClientBase::State()
+	{
+		return _state;
 	}
 	uint32_t AudioClientBase::BufferSize()
 	{
@@ -110,30 +117,33 @@ namespace winrt::Wasapi::implementation
 		return hr;
 	}
 
-	HRESULT AudioClientBase::InitializeImpl(DWORD flags, REFERENCE_TIME bufferSize, const WAVEFORMATEX* pFormat)
+	// Passing in 0 as bufferSize or nullptr for format will use default values
+	HRESULT AudioClientBase::InitializeClient(DWORD flags, REFERENCE_TIME bufferSize, const WAVEFORMATEX* pFormat)
 	{
-		auto a = trace::begin_initialize(flags,bufferSize,pFormat);
-		HRESULT hr = _audioClient->Initialize(AUDCLNT_SHAREMODE::AUDCLNT_SHAREMODE_SHARED, flags, bufferSize, 0, pFormat, nullptr);
+		REFERENCE_TIME initializeBufferSize = bufferSize;
+		if (initializeBufferSize == 0) {
+			check_hresult(_audioClient->GetDevicePeriod(&initializeBufferSize, nullptr));
+		}
+		WAVEFORMATEX* pInitializeFormat = (WAVEFORMATEX*) pFormat;
+		if (!pInitializeFormat) {
+			check_hresult(_audioClient->GetMixFormat(&pInitializeFormat));
+		}
+		auto a = trace::begin_initialize(flags,bufferSize, pInitializeFormat);
+		HRESULT hr = _audioClient->Initialize(AUDCLNT_SHAREMODE::AUDCLNT_SHAREMODE_SHARED, flags, initializeBufferSize, 0, pInitializeFormat, nullptr);
 		trace::end_initialize(a,hr);
+
+		if SUCCEEDED(hr) {
+			_state = AudioSessionClientState::Stopped;
+			audioFrameSize = pInitializeFormat->wBitsPerSample >> 3;
+			audioSampleRate = pInitializeFormat->nSamplesPerSec;
+			if (flags & AUDCLNT_STREAMFLAGS_EVENTCALLBACK) {
+				_callback = make_self<AudioSessionClientCallback>(this);
+
+			}
+		}
+		if (!pFormat) {
+			CoTaskMemFree(pInitializeFormat);
+		}
 		return hr;
 	}
-
-	void AudioClientBase::InitializeWithDefaults(DWORD flags) {
-		REFERENCE_TIME defaultBufferSize = 0;
-		check_hresult(_audioClient->GetDevicePeriod(&defaultBufferSize, nullptr));
-		WAVEFORMATEX* pFormat = nullptr;
-		check_hresult(_audioClient->GetMixFormat(&pFormat));
-		check_hresult(InitializeImpl(flags, defaultBufferSize, pFormat));
-		audioFrameSize = pFormat->wBitsPerSample >> 3;
-		audioSampleRate = pFormat->nSamplesPerSec;
-		CoTaskMemFree(pFormat);
-	}
-	
-	void AudioClientBase::InitializeEventDriven(DWORD flags)
-	{
-		InitializeWithDefaults(AUDCLNT_STREAMFLAGS_EVENTCALLBACK | flags);
-		_callback = make_self<AudioSessionClientCallback>(this);
-	}
-
-
 }

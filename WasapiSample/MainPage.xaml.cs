@@ -32,6 +32,9 @@ namespace WasapiSample
         {
             this.InitializeComponent();
             InitializeAudioAsync();
+
+            var info = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+            System.Diagnostics.Debug.WriteLine($"Diagonal:{info.DiagonalSizeInInches}inch LogicalDpi:{info.LogicalDpi} DpiX:{info.RawDpiX} DpiY:{info.RawDpiY} RawPerView:{info.RawPixelsPerViewPixel} ScaleFactor:{info.ResolutionScale}");
         }
 
 

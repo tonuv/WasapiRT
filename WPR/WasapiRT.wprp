@@ -28,7 +28,7 @@
     <EventProvider Id="AudioCoreCrimson" Name="AE4BD3BE-F36F-45b6-8D21-BDD6FB832853"/>
     <EventProvider Id="AudioUI" Name="07de7879-1c96-41ce-afbd-c659a0e8e643"/>
     <EventProvider Id="EditingAPI" Name=" 1123dc81-0423-4f27-bf57-6619e6bf85cc"/>
-
+    <EventProvider Id="AudioClient" Name="6e7b1892-5288-5fe5-8f34-e3b0dc671fd2" Level="4" Stack="true" NonPagedMemory="false"/>
 
     <Profile Id="MF.Verbose.File" Name="MF" Description="Media Foundation" LoggingMode="File" DetailLevel="Verbose">
       <Collectors>
@@ -53,6 +53,7 @@
             <EventProviderId Value="AudioGraph"/>
             <EventProviderId Value="Audio"/>
             <EventProviderId Value="AudioEvents"/>
+            <EventProviderId Value="AudioClient"/>
           </EventProviders>
         </EventCollectorId>
       </Collectors>

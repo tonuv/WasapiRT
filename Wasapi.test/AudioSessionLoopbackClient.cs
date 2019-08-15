@@ -41,7 +41,7 @@ namespace Wasapi.test
         {
             _sw = Stopwatch.StartNew();
             _sut.Start();
-            await Task.Delay(250);
+            await Task.Delay(200);
             _sut.Stop();
             Assert.IsTrue(_callbacks.Any());
         }

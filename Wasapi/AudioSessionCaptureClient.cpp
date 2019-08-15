@@ -16,24 +16,36 @@ namespace winrt::Wasapi::implementation
 	}
 	void AudioSessionCaptureClient::Initialize()
 	{
-		InitializeWithDefaults();
+		if (State() != AudioSessionClientState::Uninitialized)
+			throw hresult_error(E_NOT_VALID_STATE);
+
+		InitializeClient();
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	void AudioSessionCaptureClient::Initialize(IAudioSessionCaptureCallback const& callback)
 	{
+		if (State() != AudioSessionClientState::Uninitialized)
+			throw hresult_error(E_NOT_VALID_STATE);
+
 		_captureCallback = callback;
-		InitializeEventDriven();
+		InitializeClient(AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	void AudioSessionCaptureClient::InitializeLoopback()
 	{
-		InitializeWithDefaults(AUDCLNT_STREAMFLAGS_LOOPBACK);
+		if (State() != AudioSessionClientState::Uninitialized)
+			throw hresult_error(E_NOT_VALID_STATE);
+
+		InitializeClient(AUDCLNT_STREAMFLAGS_LOOPBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	void AudioSessionCaptureClient::InitializeLoopback(IAudioSessionCaptureCallback const& callback)
 	{
+		if (State() != AudioSessionClientState::Uninitialized)
+			throw hresult_error(E_NOT_VALID_STATE);
+
 		_captureCallback = callback;
-		InitializeEventDriven(AUDCLNT_STREAMFLAGS_LOOPBACK);
+		InitializeClient(AUDCLNT_STREAMFLAGS_LOOPBACK | AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	uint32_t AudioSessionCaptureClient::NextPacketSize()
@@ -44,7 +56,9 @@ namespace winrt::Wasapi::implementation
 	}
 	void AudioSessionCaptureClient::OnEventCallback()
 	{
-		_captureCallback.OnFramesAvailable();
+		if (_state == AudioSessionClientState::Running) {
+			_captureCallback.OnFramesAvailable();
+		}
 	}
 
 	

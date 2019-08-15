@@ -35,6 +35,7 @@
     <Midl Include="AudioSessionClient.idl" />
     <Midl Include="AudioSessionCaptureClient.idl" />
     <Midl Include="AudioSessionRenderClient.idl" />
+    <Midl Include="AudioSessionClientState.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Wasapi.def" />

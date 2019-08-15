@@ -7,6 +7,14 @@ using namespace winrt;
 
 namespace trace {
 	LoggingChannel g_Log = LoggingChannel(L"WasapiRT",nullptr);
+	
+	void AddPointerField(LoggingFields const& fields, winrt::hstring const& name,const void* ptr) {
+#ifdef _WIN64
+		fields.AddInt64(name, (int64_t)(ptr), LoggingFieldFormat::Hexadecimal);
+#else
+		fields.AddInt32(name, (int32_t)(ptr), LoggingFieldFormat::Hexadecimal);
+#endif
+	}
 
 	void create_capture_client(winrt::hstring const& id)
 	{
@@ -51,33 +59,21 @@ namespace trace {
 	activity start(const void *pClient)
 	{
 		LoggingFields fields = LoggingFields();
-#ifdef sizeof(void*) = 32
-		fields.AddInt32(L"pClient", (int32_t)(pClient),LoggingFieldFormat::Hexadecimal);
-#else
-		fields.AddInt64(L"pClient", (int64_t)(pClient), LoggingFieldFormat::Hexadecimal);
-#endif
+		AddPointerField(fields,L"pClient", pClient);
 		return g_Log.StartActivity(L"Start", fields);
 	}
 
 	activity stop(const void* pClient)
 	{
 		LoggingFields fields = LoggingFields();
-#ifdef sizeof(void*) = 32
-		fields.AddInt32(L"pClient", (int32_t)(pClient), LoggingFieldFormat::Hexadecimal);
-#else
-		fields.AddInt64(L"pClient", (int64_t)(pClient), LoggingFieldFormat::Hexadecimal);
-#endif
+		AddPointerField(fields,L"pClient", pClient);
 		return g_Log.StartActivity(L"Stop", fields);
 	}
 
 	activity reset(const void* pClient)
 	{
 		LoggingFields fields = LoggingFields();
-#ifdef sizeof(void*) = 32
-		fields.AddInt32(L"pClient", (int32_t)(pClient), LoggingFieldFormat::Hexadecimal);
-#else
-		fields.AddInt64(L"pClient", (int64_t)(pClient), LoggingFieldFormat::Hexadecimal);
-#endif
+		AddPointerField(fields,L"pClient", pClient);
 		return g_Log.StartActivity(L"Reset", fields);
 	}
 

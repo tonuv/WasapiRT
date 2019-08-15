@@ -1,5 +1,6 @@
 import "AudioSessionCaptureClient.idl";
 import "AudioSessionRenderClient.idl";
+import "AudioSessionClientState.idl";
 
 namespace Wasapi
 {
@@ -8,6 +9,7 @@ namespace Wasapi
 		void Start();
 		void Stop();
 		void Reset();
+		AudioSessionClientState State{ get; };
 		UInt32 BufferSize{ get; };
 		UInt32 Padding{ get; };
 		Windows.Foundation.TimeSpan DefaultPeriod{ get; };
