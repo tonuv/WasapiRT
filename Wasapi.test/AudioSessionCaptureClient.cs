@@ -28,6 +28,21 @@ namespace Wasapi.test
             _sut.Dispose();
         }
 
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Capture_Period()
+        {
+            Assert.IsTrue(_sut.Period != 0);
+        }
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Capture_Format()
+        {
+            Assert.AreEqual("Audio", _sut.Format?.Type);
+        }
+
+
         [TestCategory("Properties")]
         [TestMethod]
         public void Capture_BufferSize()
@@ -61,7 +76,7 @@ namespace Wasapi.test
         [TestMethod]
         public void Capture_GetFormat_TypeIsAudio()
         {
-            var format = _sut.GetFormat();
+            var format = _sut.GetDefaultFormat();
             Assert.AreEqual("Audio", format.Type);
         }
 
@@ -69,9 +84,27 @@ namespace Wasapi.test
         [TestMethod]
         public void Capture_GetFormat_SubTypeIsAudio()
         {
-            var format = _sut.GetFormat();
+            var format = _sut.GetDefaultFormat();
             Assert.AreEqual("Float", format.Subtype);
         }
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Capture_State_Running_After_Start()
+        { 
+            _sut.Start();
+            Assert.AreEqual(AudioSessionClientState.Running, _sut.State);
+        }
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Capture_State_Stopped_After_Stop()
+        {
+            _sut.Start();
+            _sut.Stop();
+            Assert.AreEqual(AudioSessionClientState.Stopped, _sut.State);
+        }
+
         [TestCategory("Operation")]
         [TestMethod]
         public void Capture_Start()

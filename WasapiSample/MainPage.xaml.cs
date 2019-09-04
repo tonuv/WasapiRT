@@ -47,7 +47,7 @@ namespace WasapiSample
             var defaultRenderDevice = await DeviceInformation.CreateFromIdAsync(Windows.Media.Devices.MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default));
             audioClient = await AudioSessionClient.CreateCaptureClientAsync(defaultRenderDevice);
             audioClient.InitializeLoopback(this);
-            var format = audioClient.GetFormat();
+            var format = audioClient.GetDefaultFormat();
             var step = format.SampleRate / 60;
             analyzer = new AudioAnalyzer(100000, format.ChannelCount, format.SampleRate, step, 0, 2048, true);
          }

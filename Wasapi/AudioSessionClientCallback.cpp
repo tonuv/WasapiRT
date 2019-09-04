@@ -6,8 +6,9 @@
 namespace winrt::Wasapi::implementation {
 	AudioSessionClientCallback::AudioSessionClientCallback(AudioClientBase* pClient)
 	{
+		_callbackEventHandle = winrt::handle(CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS));
 		_client = pClient;
-		_result = _client->_audioClient->SetEventHandle(_eventCallback);
+		_result = _client->_audioClient->SetEventHandle(_callbackEventHandle.get());
 		if (SUCCEEDED(_result)) {
 			_result = SetupWorkQueue();
 		}
@@ -22,21 +23,19 @@ namespace winrt::Wasapi::implementation {
 		*pdwQueue = workQueueId;
 		return S_OK;
 	}
-	HRESULT __stdcall AudioSessionClientCallback::Invoke(IMFAsyncResult*)
+	HRESULT __stdcall AudioSessionClientCallback::Invoke(IMFAsyncResult *)
 	{
-		_csCallback.enter();
 		auto activity = trace::begin_client_callback();
 		_client->OnEventCallback();
 		activity.end();
 		ScheduleWorkItemWait();
-		_csCallback.leave();
 		return S_OK;
 	}
 
 	HRESULT AudioSessionClientCallback::ScheduleWorkItemWait()
 	{
 		trace::schedule_callback();
-		return MFPutWaitingWorkItem(_eventCallback, 0, _asyncResult.get(), &_workItemKey);
+		return MFPutWaitingWorkItem(_callbackEventHandle.get(), 0, _asyncResult.get(), &_workItemKey);
 	}
 	HRESULT AudioSessionClientCallback::CancelWorkItemWait()
 	{

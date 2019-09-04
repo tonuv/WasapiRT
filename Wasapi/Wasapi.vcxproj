@@ -110,7 +110,6 @@
     <ClInclude Include="AudioSessionRenderClient.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="wrappers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioClientBase.cpp" />

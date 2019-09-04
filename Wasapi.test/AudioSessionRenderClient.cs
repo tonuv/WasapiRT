@@ -30,6 +30,19 @@ namespace Wasapi.test
 
         [TestCategory("Properties")]
         [TestMethod]
+        public void Render_Period()
+        {
+            Assert.IsTrue(_sut.Period != 0);
+        }
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Render_Format()
+        {
+            Assert.AreEqual("Audio", _sut.Format?.Type);
+        }
+
+        [TestCategory("Properties")]
+        [TestMethod]
         public void Render_BufferSize()
         {
             Assert.AreEqual(1056u, _sut.BufferSize);
@@ -58,19 +71,31 @@ namespace Wasapi.test
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_GetFormat_TypeIsAudio()
+        public void Render_GetDefaultFormat_TypeIsAudio()
         {
-            var format = _sut.GetFormat();
+            var format = _sut.GetDefaultFormat();
             Assert.AreEqual("Audio", format.Type);
+        }
+
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Render_State_Running_After_Start()
+        {
+            _sut.Start();
+            Assert.AreEqual(AudioSessionClientState.Running, _sut.State);
         }
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_GetFormat_SubTypeIsAudio()
+        public void Render_State_Stopped_After_Stop()
         {
-            var format = _sut.GetFormat();
-            Assert.AreEqual("Float", format.Subtype);
+            _sut.Start();
+            _sut.Stop();
+            Assert.AreEqual(AudioSessionClientState.Stopped, _sut.State);
         }
+
+
         [TestCategory("Operation")]
         [TestMethod]
         public void Render_Start()
@@ -119,6 +144,7 @@ namespace Wasapi.test
         {
             _callbacks = new List<TimeSpan>();
             _sut = await AudioSessionClient.CreateRenderClientAsync();
+            var period = _sut.GetPeriods(_sut.GetDefaultFormat()).DefaultPeriodFrames;
             _sut.Initialize(this);
         }
 

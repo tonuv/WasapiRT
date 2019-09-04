@@ -8,10 +8,15 @@
 
 namespace winrt::Wasapi::implementation
 {
-	AudioClientBase::AudioClientBase(winrt::com_ptr<::IAudioClient> const& client)
+	AudioClientBase::AudioClientBase(winrt::com_ptr<::IAudioClient3> const& client)
 	{
 		_state = Wasapi::AudioSessionClientState::Uninitialized;
 		_audioClient = client;
+		_clientProperties.cbSize = sizeof(_clientProperties);
+		_clientProperties.bIsOffload = false;
+		_clientProperties.eCategory = AudioCategory_Other;
+		_clientProperties.Options = AUDCLNT_STREAMOPTIONS_NONE;
+		_audioClient->SetClientProperties(&_clientProperties);
 	}
 
 	void AudioClientBase::Close()
@@ -49,6 +54,14 @@ namespace winrt::Wasapi::implementation
 	{
 		return _state;
 	}
+	Windows::Media::MediaProperties::AudioEncodingProperties AudioClientBase::Format()
+	{
+		return _format;
+	}
+	uint32_t AudioClientBase::Period()
+	{
+		return _periodInFrames;
+	}
 	uint32_t AudioClientBase::BufferSize()
 	{
 		UINT32 bufferSize = 0;
@@ -61,37 +74,20 @@ namespace winrt::Wasapi::implementation
 		check_hresult(_audioClient->GetCurrentPadding(&padding));
 		return padding;
 	}
-	winrt::Windows::Foundation::TimeSpan AudioClientBase::DefaultPeriod()
-	{
-		REFERENCE_TIME period = 0;
-		check_hresult(_audioClient->GetDevicePeriod(&period, nullptr));
-		return Windows::Foundation::TimeSpan(period);
-	}
-	winrt::Windows::Foundation::TimeSpan AudioClientBase::MinimumPeriod()
-	{
-		REFERENCE_TIME period = 0;
-		check_hresult(_audioClient->GetDevicePeriod(nullptr, &period));
-		return Windows::Foundation::TimeSpan(period);
-	}
 	Windows::Foundation::TimeSpan AudioClientBase::Latency()
 	{
 		REFERENCE_TIME latency = 0;
 		check_hresult(_audioClient->GetStreamLatency(&latency));
 		return Windows::Foundation::TimeSpan(latency);
 	}
-	winrt::Windows::Media::MediaProperties::AudioEncodingProperties AudioClientBase::GetFormat()
+	winrt::Windows::Media::MediaProperties::AudioEncodingProperties AudioClientBase::GetDefaultFormat()
 	{
 		WAVEFORMATEX* pFormat = nullptr;
 		check_hresult(_audioClient->GetMixFormat(&pFormat));
-		com_ptr<IMFMediaType> mediaType;
-		check_hresult(MFCreateMediaType(mediaType.put()));
-		check_hresult(MFInitMediaTypeFromWaveFormatEx(mediaType.get(), pFormat,sizeof(WAVEFORMATEX) + pFormat->cbSize));
+
+		auto encoding = WaveFormatExToMediaProperties(pFormat);
 		CoTaskMemFree(pFormat);
 
-		com_ptr<ABI::Windows::Media::MediaProperties::IAudioEncodingProperties> abiMediaProps;
-		check_hresult(MFCreatePropertiesFromMediaType(mediaType.get(), IID_PPV_ARGS(abiMediaProps.put())));
-
-		auto encoding =  abiMediaProps.as<winrt::Windows::Media::MediaProperties::AudioEncodingProperties>();
 		trace::get_format(encoding);
 		return encoding;
 	}
@@ -106,6 +102,34 @@ namespace winrt::Wasapi::implementation
 		return hr == S_OK;
 	}
 
+	Wasapi::AudioClientEnginePeriods AudioClientBase::GetPeriods(Windows::Media::MediaProperties::AudioEncodingProperties const& format)
+	{
+		WAVEFORMATEX* pFormat{ nullptr };
+		check_hresult(MediaPropertiesToWaveFormatEx(format, &pFormat));
+		Wasapi::AudioClientEnginePeriods result { 0,0,0,0 };
+		check_hresult(_audioClient->GetSharedModeEnginePeriod(pFormat,&result.DefaultPeriodFrames,&result.FundamentalPeriodFrames,&result.MinimumPeriodFrames,&result.MaximumPeriodFrames));
+		CoTaskMemFree(pFormat);
+		return result;
+	}
+
+	bool AudioClientBase::IsRawStream()
+	{
+		return (_clientProperties.Options & AUDCLNT_STREAMOPTIONS_RAW) != 0;
+	}
+
+	void AudioClientBase::IsRawStream(bool bIsRaw)
+	{
+		if (bIsRaw != IsRawStream()) {
+			if (bIsRaw) {
+				_clientProperties.Options |= AUDCLNT_STREAMOPTIONS_RAW;
+			}
+			else {
+				_clientProperties.Options &= ~AUDCLNT_STREAMOPTIONS_RAW;
+			}
+			check_hresult(_audioClient->SetClientProperties(&_clientProperties));
+		}
+	}
+
 	HRESULT AudioClientBase::MediaPropertiesToWaveFormatEx(Windows::Media::MediaProperties::AudioEncodingProperties const& format, WAVEFORMATEX** ppFormat)
 	{
 		com_ptr<IMFMediaType> mediaType;
@@ -117,21 +141,43 @@ namespace winrt::Wasapi::implementation
 		return hr;
 	}
 
-	// Passing in 0 as bufferSize or nullptr for format will use default values
-	HRESULT AudioClientBase::InitializeClient(DWORD flags, REFERENCE_TIME bufferSize, const WAVEFORMATEX* pFormat)
+	Windows::Media::MediaProperties::AudioEncodingProperties AudioClientBase::WaveFormatExToMediaProperties(const WAVEFORMATEX* pFormat)
 	{
-		REFERENCE_TIME initializeBufferSize = bufferSize;
-		if (initializeBufferSize == 0) {
-			check_hresult(_audioClient->GetDevicePeriod(&initializeBufferSize, nullptr));
-		}
-		WAVEFORMATEX* pInitializeFormat = (WAVEFORMATEX*) pFormat;
+		com_ptr<IMFMediaType> mediaType;
+		check_hresult(MFCreateMediaType(mediaType.put()));
+		check_hresult(MFInitMediaTypeFromWaveFormatEx(mediaType.get(), pFormat, sizeof(WAVEFORMATEX) + pFormat->cbSize));
+
+		com_ptr<ABI::Windows::Media::MediaProperties::IAudioEncodingProperties> abiMediaProps;
+		check_hresult(MFCreatePropertiesFromMediaType(mediaType.get(), IID_PPV_ARGS(abiMediaProps.put())));
+
+		return abiMediaProps.as<winrt::Windows::Media::MediaProperties::AudioEncodingProperties>();
+	}
+
+
+	HRESULT AudioClientBase::InitializeSharedClient(DWORD flags,uint32_t periodInFrames, const WAVEFORMATEX *pFormat)
+	{
+
+		WAVEFORMATEX* pInitializeFormat = (WAVEFORMATEX*)pFormat;
 		if (!pInitializeFormat) {
 			check_hresult(_audioClient->GetMixFormat(&pInitializeFormat));
 		}
-		auto a = trace::begin_initialize(flags,bufferSize, pInitializeFormat);
-		HRESULT hr = _audioClient->Initialize(AUDCLNT_SHAREMODE::AUDCLNT_SHAREMODE_SHARED, flags, initializeBufferSize, 0, pInitializeFormat, nullptr);
-		trace::end_initialize(a,hr);
 
+		uint32_t initEnginePeriod = periodInFrames;
+		if (initEnginePeriod == 0) {
+			uint32_t notused1, notused2, notused3;
+			check_hresult(_audioClient->GetSharedModeEnginePeriod(pInitializeFormat, &initEnginePeriod, &notused1, &notused2, &notused3));
+		}
+
+		HRESULT hr = S_OK;
+		// InitializeSharedAudioStream does not allow loopback flag. Maybe a bug - work around that by calling Initialize for loopback stream
+		if (flags & AUDCLNT_STREAMFLAGS_LOOPBACK) {
+			// (1+20000000L...) >> 1 construct for rounding
+			REFERENCE_TIME streamPeriod = (1 + 20000000L * long(initEnginePeriod) / long(pInitializeFormat->nSamplesPerSec))>>1;
+			hr = _audioClient->Initialize(AUDCLNT_SHAREMODE::AUDCLNT_SHAREMODE_SHARED, flags, 0, streamPeriod, pInitializeFormat, nullptr);
+		}
+		else {
+			hr = _audioClient->InitializeSharedAudioStream(flags, initEnginePeriod, pInitializeFormat, nullptr);
+		}
 		if SUCCEEDED(hr) {
 			_state = AudioSessionClientState::Stopped;
 			audioFrameSize = pInitializeFormat->wBitsPerSample >> 3;
@@ -140,10 +186,16 @@ namespace winrt::Wasapi::implementation
 				_callback = make_self<AudioSessionClientCallback>(this);
 
 			}
+			WAVEFORMATEX* pCurrentFormat = nullptr;
+			check_hresult(_audioClient->GetCurrentSharedModeEnginePeriod(&pCurrentFormat, &_periodInFrames));
+			_format = WaveFormatExToMediaProperties(pCurrentFormat);
+			CoTaskMemFree(pCurrentFormat);
+			
 		}
 		if (!pFormat) {
 			CoTaskMemFree(pInitializeFormat);
 		}
+
 		return hr;
 	}
 }

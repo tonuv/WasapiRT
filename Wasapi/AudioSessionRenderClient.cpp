@@ -17,7 +17,7 @@ namespace winrt::Wasapi::implementation
 		if (State() != AudioSessionClientState::Uninitialized)
 			throw hresult_error(E_NOT_VALID_STATE);
 
-		InitializeClient();
+		check_hresult(InitializeSharedClient());
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioRenderClient), _renderClient.put_void()));
 	}
 	void AudioSessionRenderClient::Initialize(IAudioSessionRenderCallback const& callback)
@@ -26,7 +26,7 @@ namespace winrt::Wasapi::implementation
 			throw hresult_error(E_NOT_VALID_STATE);
 
 		_renderCallback = callback;
-		InitializeClient(AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
+		check_hresult(InitializeSharedClient(AUDCLNT_STREAMFLAGS_EVENTCALLBACK));
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioRenderClient), _renderClient.put_void()));
 	}
 	void AudioSessionRenderClient::AddFrames(Windows::Media::AudioBuffer const& buffer)

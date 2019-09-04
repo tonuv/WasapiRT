@@ -7,7 +7,7 @@
 
 namespace winrt::Wasapi::implementation
 {
-	AudioSessionCaptureClient::AudioSessionCaptureClient(winrt::com_ptr<::IAudioClient> const& client) : AudioClientBase(client)
+	AudioSessionCaptureClient::AudioSessionCaptureClient(winrt::com_ptr<::IAudioClient3> const& client) : AudioClientBase(client)
 	{
 		MULTI_QI qiFactory[1] = { { &__uuidof(IAudioFrameNativeFactory),nullptr,S_OK } };
 		check_hresult(CoCreateInstanceFromApp(CLSID_AudioFrameNativeFactory, nullptr, CLSCTX_INPROC_SERVER, nullptr, 1, qiFactory));
@@ -18,8 +18,8 @@ namespace winrt::Wasapi::implementation
 	{
 		if (State() != AudioSessionClientState::Uninitialized)
 			throw hresult_error(E_NOT_VALID_STATE);
-
-		InitializeClient();
+		
+		InitializeSharedClient();
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	void AudioSessionCaptureClient::Initialize(IAudioSessionCaptureCallback const& callback)
@@ -28,7 +28,7 @@ namespace winrt::Wasapi::implementation
 			throw hresult_error(E_NOT_VALID_STATE);
 
 		_captureCallback = callback;
-		InitializeClient(AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
+		InitializeSharedClient(AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	void AudioSessionCaptureClient::InitializeLoopback()
@@ -36,7 +36,7 @@ namespace winrt::Wasapi::implementation
 		if (State() != AudioSessionClientState::Uninitialized)
 			throw hresult_error(E_NOT_VALID_STATE);
 
-		InitializeClient(AUDCLNT_STREAMFLAGS_LOOPBACK);
+		InitializeSharedClient(AUDCLNT_STREAMFLAGS_LOOPBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	void AudioSessionCaptureClient::InitializeLoopback(IAudioSessionCaptureCallback const& callback)
@@ -45,7 +45,7 @@ namespace winrt::Wasapi::implementation
 			throw hresult_error(E_NOT_VALID_STATE);
 
 		_captureCallback = callback;
-		InitializeClient(AUDCLNT_STREAMFLAGS_LOOPBACK | AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
+		InitializeSharedClient(AUDCLNT_STREAMFLAGS_LOOPBACK | AUDCLNT_STREAMFLAGS_EVENTCALLBACK);
 		check_hresult(_audioClient->GetService(__uuidof(::IAudioCaptureClient), _captureClient.put_void()));
 	}
 	uint32_t AudioSessionCaptureClient::NextPacketSize()

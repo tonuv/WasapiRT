@@ -8,8 +8,8 @@ namespace winrt::Wasapi
 	// Class wrapping async audio interface activateion and returning a waitable task
 	struct AudioInterfaceActivator : winrt::implements<AudioInterfaceActivator, ::IActivateAudioInterfaceCompletionHandler>
 	{
-		concurrency::task_completion_event<winrt::com_ptr<::IAudioClient>> activationCompleted;
+		concurrency::task_completion_event<winrt::com_ptr<::IAudioClient3>> activationCompleted;
 		HRESULT STDMETHODCALLTYPE ActivateCompleted(::IActivateAudioInterfaceAsyncOperation* activateOperation);
-		static concurrency::task<winrt::com_ptr<::IAudioClient>> ActivateAudioInterfaceAsync(LPCWCHAR szDeviceId);
+		static concurrency::task<winrt::com_ptr<::IAudioClient3>> ActivateAudioInterfaceAsync(LPCWCHAR szDeviceId);
 	};
 }

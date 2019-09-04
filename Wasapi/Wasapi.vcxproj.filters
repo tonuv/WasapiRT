@@ -25,7 +25,6 @@
     <ClInclude Include="AudioInterfaceActivator.h" />
     <ClInclude Include="AudioSessionCaptureClient.h" />
     <ClInclude Include="AudioSessionClient.h" />
-    <ClInclude Include="wrappers.h" />
     <ClInclude Include="AudioSessionRenderClient.h" />
     <ClInclude Include="AudioClientBase.h" />
     <ClInclude Include="AudioSessionClientCallback.h" />

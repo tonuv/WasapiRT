@@ -1,7 +1,6 @@
 #pragma once
 #include <mfapi.h>
 #include <Audioclient.h>
-#include "wrappers.h"
 
 namespace winrt::Wasapi::implementation
 {
@@ -13,8 +12,8 @@ namespace winrt::Wasapi::implementation
 		DWORD workQueueId = 0;
 		winrt::com_ptr<IMFAsyncResult> _asyncResult;
 		MFWORKITEM_KEY _workItemKey = 0;
-		win32::event _eventCallback;
-		win32::critical_section _csCallback;
+		winrt::handle _callbackEventHandle;
+		
 		winrt::hresult _result = S_OK;
 
 		AudioClientBase* _client;

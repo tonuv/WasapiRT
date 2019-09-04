@@ -10,7 +10,7 @@ namespace winrt::Wasapi::implementation
 		winrt::com_ptr<::IAudioRenderClient> _renderClient;
 		IAudioSessionRenderCallback _renderCallback{ nullptr };
 
-		AudioSessionRenderClient(winrt::com_ptr<::IAudioClient> const& client) : AudioClientBase(client) {
+		AudioSessionRenderClient(winrt::com_ptr<::IAudioClient3> const& client) : AudioClientBase(client) {
 
 		}
 		uint32_t FramesNeeded();

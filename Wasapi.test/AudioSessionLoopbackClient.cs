@@ -25,8 +25,10 @@ namespace Wasapi.test
         {
             _callbacks = new List<TimeSpan>();
             var defaultRenderDevice = await DeviceInformation.CreateFromIdAsync(MediaDevice.GetDefaultAudioRenderId(AudioDeviceRole.Default));
-            _sut = await AudioSessionClient.CreateCaptureClientAsync(defaultRenderDevice);
-            _sut.InitializeLoopback(this);
+            await Task.Run(async () => {
+                _sut = await AudioSessionClient.CreateCaptureClientAsync(defaultRenderDevice);
+                _sut.InitializeLoopback(this);
+            });
         }
 
         [TestCleanup]
@@ -43,7 +45,7 @@ namespace Wasapi.test
             _sut.Start();
             await Task.Delay(200);
             _sut.Stop();
-            Assert.IsTrue(_callbacks.Any());
+            Assert.IsTrue(_callbacks.Any(),"No callbacks from the started stream");
         }
 
         public void OnFramesAvailable()

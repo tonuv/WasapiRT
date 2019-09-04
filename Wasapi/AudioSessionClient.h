@@ -3,7 +3,6 @@
 #include "AudioSessionClient.g.h"
 #include "AudioSessionCaptureClient.h"
 #include "AudioSessionRenderClient.h"
-#include "wrappers.h"
 
 namespace winrt::Wasapi::implementation
 {

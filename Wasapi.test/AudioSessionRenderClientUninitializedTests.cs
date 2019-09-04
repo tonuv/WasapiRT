@@ -39,25 +39,39 @@ namespace Wasapi.test
 
         [TestCategory("Properties")]
         [TestMethod]
-        public void Render_Uninitialized_DefaultPeriod()
+        public void Uninitialized_EnginePeriods()
         {
-            var defaultPeriod = _sut.DefaultPeriod;
-            Assert.AreEqual(TimeSpan.FromMilliseconds(10), defaultPeriod);
-        }
-        [TestCategory("Properties")]
-        [TestMethod]
-        public void Render_Uninitialized_MinimumPeriod()
-        {
-            var minimumPeriod = _sut.MinimumPeriod;
-            Assert.IsTrue(minimumPeriod.TotalMilliseconds <= 3.0);
+            var format = _sut.GetDefaultFormat();
+            var periods = _sut.GetPeriods(format);
+            Assert.AreNotEqual(0u, periods.DefaultPeriodFrames);
+            Assert.AreNotEqual(0u, periods.FundamentalPeriodFrames);
+            Assert.AreNotEqual(0u, periods.MinimumPeriodFrames);
+            Assert.AreNotEqual(0u, periods.MaximumPeriodFrames);
+            Assert.IsTrue(periods.MinimumPeriodFrames <= periods.MaximumPeriodFrames);
+            Assert.IsTrue(periods.MinimumPeriodFrames <= periods.DefaultPeriodFrames && periods.DefaultPeriodFrames <= periods.MaximumPeriodFrames);
+            Assert.AreEqual(0u, periods.DefaultPeriodFrames % periods.FundamentalPeriodFrames);
         }
 
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Uninitialized_IsRaw()
+        {
+            Assert.IsFalse(_sut.IsRawStream);
+        }
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Uninitialized_SetRaw()
+        {
+            _sut.IsRawStream = true;
+            Assert.IsTrue(_sut.IsRawStream);
+        }
 
         [TestCategory("Properties")]
         [TestMethod]
         public void Render_Uninitialized_GetFormat()
         {
-            var format = _sut.GetFormat();
+            var format = _sut.GetDefaultFormat();
             Assert.AreEqual(format.Type, "Audio");
         }
 
@@ -77,6 +91,20 @@ namespace Wasapi.test
             Assert.IsFalse(_sut.IsFormatSupported(format));
         }
 
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Uninitialized_Format()
+        {
+            Assert.IsNull(_sut.Format);
+        }
+
+        [TestCategory("Properties")]
+        [TestMethod]
+        public void Uninitialized_Period()
+        {
+            Assert.AreEqual(0u, _sut.Period);
+        }
 
         [TestCategory("Properties")]
         [TestMethod]

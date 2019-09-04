@@ -4,19 +4,28 @@ import "AudioSessionClientState.idl";
 
 namespace Wasapi
 {
+	struct AudioClientEnginePeriods {
+		UInt32 DefaultPeriodFrames;
+		UInt32 FundamentalPeriodFrames;
+		UInt32 MinimumPeriodFrames;
+		UInt32 MaximumPeriodFrames;
+	};
+
 	interface IAudioSessionClient
 	{
 		void Start();
 		void Stop();
 		void Reset();
 		AudioSessionClientState State{ get; };
+		Windows.Media.MediaProperties.AudioEncodingProperties Format{ get; };
+		UInt32 Period{ get; };
 		UInt32 BufferSize{ get; };
 		UInt32 Padding{ get; };
-		Windows.Foundation.TimeSpan DefaultPeriod{ get; };
-		Windows.Foundation.TimeSpan MinimumPeriod{ get; };
 		Windows.Foundation.TimeSpan Latency{ get; };
-		Windows.Media.MediaProperties.AudioEncodingProperties GetFormat();
+		Windows.Media.MediaProperties.AudioEncodingProperties GetDefaultFormat();
 		Boolean IsFormatSupported(Windows.Media.MediaProperties.AudioEncodingProperties format);
+		AudioClientEnginePeriods GetPeriods(Windows.Media.MediaProperties.AudioEncodingProperties format);
+		Boolean IsRawStream;
 	};
 
 	[default_interface]
